@@ -1,6 +1,6 @@
  Hackathon Progress Tracker
 
-    A web app to track your team's progress across multiple hackathons. Features a clean dark metal theme with passcode-protected access.
+    A web app to track your team's progress across multiple hackathons. 
 
     Features
     - 🔐 Passcode-protected dashboard 
