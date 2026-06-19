@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Progress Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ddd;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 20% 30%, #1a0a0a 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, #150a0a 0%, transparent 50%);
+        }
+        .login-container {
+            background: #151515;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #aaa;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-size: 22px;
+        }
+        h1:before {
+            content: "// ";
+            color: #555;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #0a0a0a;
+            color: #ddd;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        input[type="password"]::placeholder { color: #555; }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #222;
+            color: #888;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: #333;
+            color: #ddd;
+        }
+        .error {
+            background: #222;
+            color: #777;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Access Terminal</h1>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="/login">
+            <input type="password" name="passcode" placeholder="Enter passcode..." required autocomplete="off">
+            <button type="submit">Initialize</button>
+        </form>
+    </div>
+</body>
+</html>

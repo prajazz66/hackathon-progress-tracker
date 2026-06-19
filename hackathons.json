@@ -1,0 +1,17 @@
+{
+  "hackathons": [
+    {
+      "id": 1,
+      "name": "Test",
+      "date": null,
+      "description": null,
+      "progress": 15,
+      "notes": [
+        {
+          "progress": 15,
+          "note": "Up"
+        }
+      ]
+    }
+  ]
+}
