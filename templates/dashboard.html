@@ -189,6 +189,73 @@
             font-size: 14px;
             color: #888;
             line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        .file-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        .file-section h4 {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .file-link {
+            color: #888;
+            font-size: 12px;
+            text-decoration: none;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-link:hover {
+            color: #aaa;
+        }
+        .file-remove-btn {
+            background: #0a0a0a;
+            color: #666;
+            border: 1px solid #333;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .file-remove-btn:hover {
+            background: #333;
+            color: #aaa;
+        }
+        .file-upload-form {
+            margin-top: 10px;
+        }
+        .file-upload-input {
+            display: none;
+        }
+        .file-upload-label {
+            background: #0a0a0a;
+            color: #666;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            border: 1px solid #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .file-upload-label:hover {
+            background: #222;
+            color: #888;
         }
         .hackathon-header { 
             display: flex; 
@@ -397,10 +464,34 @@
                                 <button type="submit">Update</button>
                             </form>
                         </div>
-                        {% if h.description %}
+                        {% if h.description or h.file_attachments %}
                         <div class="description-tile">
+                            {% if h.description %}
                             <h3>Description</h3>
                             <p>{{ h.description }}</p>
+                            {% endif %}
+                            <div class="file-section">
+                                <h4>Attachments</h4>
+                                {% if h.file_attachments %}
+                                    {% for file in h.file_attachments %}
+                                    <div class="file-item">
+                                        <a href="/view_file/{{ file.stored_filename }}" class="file-link" target="_blank">{{ file.original_filename }}</a>
+                                        {% if file.file_type == 'md' %}
+                                        <a href="/modify_file/{{ h.id }}/{{ file.stored_filename }}" class="file-remove-btn" style="background: #222; color: #888;">Edit</a>
+                                        {% endif %}
+                                        <form method="POST" action="/delete_file/{{ h.id }}/{{ file.stored_filename }}" style="display: inline;">
+                                            <button class="file-remove-btn" type="submit">X</button>
+                                        </form>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <span style="color: #444; font-size: 11px;">No files</span>
+                                {% endif %}
+                                <form class="file-upload-form" method="POST" action="/upload_file/{{ h.id }}" enctype="multipart/form-data">
+                                    <label class="file-upload-label" for="file-upload-{{ h.id }}">Upload .md/.pdf</label>
+                                    <input type="file" name="file" id="file-upload-{{ h.id }}" class="file-upload-input" accept=".md,.pdf" onchange="this.form.submit()">
+                                </form>
+                            </div>
                         </div>
                         {% endif %}
                     </div>
