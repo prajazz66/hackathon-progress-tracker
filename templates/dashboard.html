@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hackathon Progress Tracker - Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -19,11 +19,13 @@
                 linear-gradient(135deg, #0a0a0a 0%, #0f0a0a 50%, #0a0a0a 100%);
         }
         .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* ───── Header ───── */
         header { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 30px; 
+            margin-bottom: 25px; 
             padding-bottom: 20px; 
             border-bottom: 1px solid #333; 
         }
@@ -39,6 +41,11 @@
             content: "// ";
             color: #555;
         }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
         .logout { 
             background: #222;
             color: #888; 
@@ -48,166 +55,450 @@
             font-size: 13px;
             font-weight: 600;
             border: 1px solid #333;
+            transition: all 0.2s ease;
         }
         .logout:hover { 
             background: #333;
             color: #aaa;
         }
-        .add-form { 
-            background: #151515;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px; 
-            display: flex; 
-            gap: 10px;
-            border: 1px solid #222;
-        }
-        .add-form input[type="text"], .add-form input[type="date"], .add-form textarea { 
-            padding: 12px; 
-            border: 1px solid #333;
-            border-radius: 4px; 
-            background: #0a0a0a;
-            color: #ddd; 
-            font-size: 14px;
-            font-family: inherit;
-        }
-        .add-form input[type="text"] { flex: 3; }
-        .add-form input[type="date"] { flex: 0 0 160px; }
-        .add-form textarea { 
-            flex: 1; 
-            min-height: 60px; 
-            resize: none; 
-        }
-        .add-form input::placeholder, .add-form textarea::placeholder { color: #555; }
-        .add-form button { 
-            padding: 12px 24px; 
-            background: #222;
-            color: #aaa; 
-            border: 1px solid #333;
-            border-radius: 4px; 
-            font-weight: 600; 
+
+        /* ───── Primary Action Buttons ───── */
+        .btn-add-event {
+            background: linear-gradient(135deg, #00f3ff, #0077ff);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            transition: all 0.25s ease;
         }
-        .add-form button:hover { 
-            background: #333;
-            color: #ddd;
+        .btn-add-event:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 22px rgba(0, 243, 255, 0.5);
+            color: #000;
         }
-        .main-layout {
-            display: flex;
-            gap: 20px;
-        }
-        .live-feed {
+        .export-btn {
             background: #151515;
-            padding: 20px;
-            border-radius: 8px;
-            flex: 0 0 280px;
-            border: 1px solid #222;
-            align-self: flex-start;
-            height: fit-content;
-        }
-        .live-feed h2 {
-            font-size: 14px;
             color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        .live-hackathon {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #222;
-        }
-        .live-hackathon:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        .live-thumbnail {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            margin-right: 10px;
-            float: left;
-            object-fit: cover;
+            padding: 9px 16px;
             border: 1px solid #333;
-        }
-        .live-title {
+            border-radius: 4px;
             font-size: 13px;
-            color: #ddd;
             font-weight: 600;
-            margin-bottom: 5px;
-            overflow: hidden;
-        }
-        .live-title a {
-            color: #888;
+            cursor: pointer;
             text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
         }
-        .live-title a:hover {
+        .export-btn:hover { background: #222; color: #aaa; }
+
+        /* ───── Tab Navigation ───── */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 25px;
+            background: #111;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            color: #666;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.25s ease;
+            letter-spacing: 0.5px;
+        }
+        .tab-btn:hover {
+            background: #1a1a1a;
+            color: #999;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .tab-btn .tab-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        /* ───── Tab Content ───── */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ───── Badges ───── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        /* Creative Mode Badges */
+        .badge-mode-online {
+            background: rgba(0, 243, 255, 0.12);
+            color: #00f3ff;
+            border: 1px solid rgba(0, 243, 255, 0.35);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+        }
+        .badge-mode-offline {
+            background: rgba(224, 86, 253, 0.12);
+            color: #e056fd;
+            border: 1px solid rgba(224, 86, 253, 0.35);
+            box-shadow: 0 0 10px rgba(224, 86, 253, 0.15);
+        }
+
+        /* Color-Coded Status Badges */
+        .badge-status-not-started {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .badge-status-in-progress {
+            background: rgba(255, 190, 13, 0.12);
+            color: #ffbe0d;
+            border: 1px solid rgba(255, 190, 13, 0.35);
+        }
+        .badge-status-ready {
+            background: rgba(0, 230, 118, 0.12);
+            color: #00e676;
+            border: 1px solid rgba(0, 230, 118, 0.35);
+        }
+
+        /* Urgency Countdown Badges */
+        .badge-countdown-normal {
+            background: rgba(0, 230, 118, 0.1);
+            color: #00e676;
+            border: 1px solid rgba(0, 230, 118, 0.25);
+        }
+        .badge-countdown-warning {
+            background: rgba(255, 190, 13, 0.1);
+            color: #ffbe0d;
+            border: 1px solid rgba(255, 190, 13, 0.25);
+        }
+        .badge-countdown-urgent {
+            background: rgba(255, 82, 82, 0.12);
+            color: #ff5252;
+            border: 1px solid rgba(255, 82, 82, 0.35);
+        }
+        .badge-past-prompt {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffbe0d;
+            border: 1px solid #ffbe0d;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 190, 13, 0.3);
+            transition: all 0.2s ease;
+        }
+        .badge-past-prompt:hover {
+            background: rgba(255, 170, 0, 0.35);
+            transform: scale(1.03);
+        }
+
+        /* ───── Accordion Compact Event Card ───── */
+        .event-accordion {
+            background: #141414;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #222;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+        .event-accordion:hover {
+            border-color: #333;
+        }
+        .event-accordion-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            cursor: pointer;
+            user-select: none;
+            background: #151515;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 0;
+        }
+        .arrow-toggle {
+            color: #666;
+            font-size: 12px;
+            transition: transform 0.25s ease;
+            width: 16px;
+            text-align: center;
+        }
+        .event-accordion.expanded .arrow-toggle {
+            transform: rotate(90deg);
+            color: #00f3ff;
+        }
+        .event-title-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .header-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .header-progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 140px;
+        }
+        .mini-progress-bar {
+            background: #0a0a0a;
+            width: 90px;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+        }
+        .mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+            background-size: 200% 100%;
+            animation: rainbow-flow 2s linear infinite;
+            transition: width 0.3s ease;
+        }
+        .progress-percent-text {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
             color: #aaa;
+            min-width: 36px;
+        }
+        .header-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ───── Expanded Card Body ───── */
+        .event-accordion-body {
+            display: none;
+            padding: 20px 25px;
+            border-top: 1px solid #222;
+            background: #0e0e0e;
+        }
+        .event-accordion.expanded .event-accordion-body {
+            display: block;
+        }
+        
+        .metadata-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: #141414;
+            border-radius: 6px;
+            border: 1px solid #222;
+            font-size: 13px;
+            color: #999;
+        }
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .metadata-item a {
+            color: #00f3ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .metadata-item a:hover {
             text-decoration: underline;
         }
-        .live-meta {
-            font-size: 11px;
-            color: #666;
-            clear: both;
-        }
-        .hackathons-container {
-            flex: 1;
-        }
-        .hackathon-wrapper {
-            display: flex;
-            gap: 20px;
+        
+        .idea-box {
+            background: #141414;
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 3px solid #00f3ff;
             margin-bottom: 20px;
         }
-        .hackathon-card { 
-            background: #151515;
-            padding: 25px;
-            border-radius: 8px;
-            flex: 1;
-            position: relative;
-            border: 1px solid #222;
+        .idea-box h4 {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
         }
-        .description-tile {
-            background: #222;
-            padding: 20px;
-            border-radius: 8px;
-            flex: 0 0 200px;
-            border: 1px solid #333;
-            align-self: flex-start;
+        .idea-box p {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.5;
+            white-space: pre-wrap;
         }
-        .description-tile h3 {
+
+        /* ───── Tasks Checklist ───── */
+        .tasks-section {
+            margin-bottom: 20px;
+        }
+        .section-heading {
             font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-        .description-tile p {
-            font-size: 14px;
             color: #888;
-            line-height: 1.4;
-            margin-bottom: 15px;
-        }
-        .file-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #333;
-        }
-        .file-section h4 {
-            font-size: 10px;
-            color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .task-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #141414;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid #222;
+            transition: border-color 0.2s;
+        }
+        .task-row:hover {
+            border-color: #333;
+        }
+        .task-checkbox-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            cursor: pointer;
+        }
+        .task-custom-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #00e676;
+        }
+        .task-title-text {
+            font-size: 13px;
+            color: #ddd;
+        }
+        .task-row.completed .task-title-text {
+            text-decoration: line-through;
+            color: #666;
+        }
+        .task-delete-btn {
+            background: transparent;
+            color: #555;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 6px;
+            transition: color 0.2s;
+        }
+        .task-delete-btn:hover { color: #ff5252; }
+
+        .add-task-inline {
+            display: flex;
+            gap: 8px;
+        }
+        .add-task-inline input {
+            flex: 1;
+            padding: 8px 12px;
+            background: #141414;
+            border: 1px solid #262626;
+            border-radius: 4px;
+            color: #ddd;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .add-task-inline input:focus {
+            outline: none;
+            border-color: #00f3ff;
+        }
+        .add-task-inline button {
+            padding: 8px 14px;
+            background: #1a1a2e;
+            color: #aaaaee;
+            border: 1px solid #2a2a4a;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .add-task-inline button:hover {
+            background: #222240;
+            color: #fff;
+        }
+
+        /* ───── Notes & File Sections ───── */
+        .notes-and-files {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #222;
+        }
+        @media (max-width: 768px) {
+            .notes-and-files { grid-template-columns: 1fr; }
+        }
+
+        .note-item { 
+            background: #141414;
+            padding: 10px 12px; 
+            border-radius: 4px; 
+            margin-bottom: 6px; 
+            font-size: 13px;
+            border-left: 2px solid #2a2a4a;
+        }
+        .note-progress { 
+            color: #8888cc; 
+            font-weight: 600; 
+            margin-right: 8px; 
+        }
+
         .file-item {
             display: flex;
             align-items: center;
             gap: 5px;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            background: #141414;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #222;
         }
         .file-link {
             color: #888;
@@ -218,9 +509,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .file-link:hover {
-            color: #aaa;
-        }
+        .file-link:hover { color: #00f3ff; }
         .file-remove-btn {
             background: #0a0a0a;
             color: #666;
@@ -229,293 +518,1062 @@
             padding: 2px 6px;
             font-size: 10px;
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-        .file-remove-btn:hover {
-            background: #333;
-            color: #aaa;
-        }
-        .file-upload-form {
-            margin-top: 10px;
-        }
-        .file-upload-input {
+
+        /* ───── Modal Dialogs ───── */
+        .modal-overlay {
             display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        .file-upload-label {
-            background: #0a0a0a;
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-card {
+            background: #151515;
+            border: 1px solid #2e2e2e;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #262626;
+        }
+        .modal-header h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: #00f3ff;
+            letter-spacing: 1px;
+        }
+        .modal-close-btn {
+            background: transparent;
+            border: none;
             color: #666;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 11px;
+            font-size: 20px;
             cursor: pointer;
-            border: 1px solid #333;
+        }
+        .modal-close-btn:hover { color: #fff; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #888;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .file-upload-label:hover {
-            background: #222;
-            color: #888;
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="url"],
+        .form-group textarea {
+            padding: 10px 12px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 5px;
+            color: #ddd;
+            font-size: 13px;
+            font-family: inherit;
         }
-        .hackathon-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 15px; 
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #00f3ff;
         }
-        .hackathon-header-left {
+        .form-group textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        /* Radio Mode Buttons */
+        .mode-radio-group {
+            display: flex;
+            gap: 10px;
+        }
+        .mode-radio-label {
+            flex: 1;
+            padding: 10px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+        }
+        .mode-radio-group input[type="radio"] { display: none; }
+        .mode-radio-group input[type="radio"]:checked + .mode-radio-label.online {
+            background: rgba(0, 243, 255, 0.15);
+            color: #00f3ff;
+            border-color: #00f3ff;
+        }
+        .mode-radio-group input[type="radio"]:checked + .mode-radio-label.offline {
+            background: rgba(224, 86, 253, 0.15);
+            color: #e056fd;
+            border-color: #e056fd;
+        }
+
+        /* Registration Switch */
+        .checkbox-switch-label {
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        .hackathon-name { 
-            font-size: 20px; 
-            font-weight: 600; 
-            color: #ddd; 
-        }
-        .hackathon-percentage { 
-            color: #888; 
-            font-weight: 600;
-            font-size: 18px;
-        }
-        .delete-btn { 
-            background: #222;
-            color: #666;
-            border: 1px solid #333;
-            border-radius: 4px; 
-            padding: 4px 12px; 
-            font-size: 11px; 
-            font-weight: 600; 
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .delete-btn:hover { 
-            background: #333;
-            color: #999;
-        }
-        .hackathon-date { 
-            font-size: 13px; 
-            color: #666; 
-            margin-bottom: 10px; 
-        }
-        .progress-bar { 
-            background: #0a0a0a;
-            width: 100%;
-            height: 24px;
-            border-radius: 4px; 
-            overflow: hidden;
-            border: 1px solid #333;
-            margin-bottom: 15px;
-        }
-        .progress-fill { 
-            height: 100%; 
-            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-            background-size: 200% 100%;
-            animation: rainbow-flow 2s linear infinite;
-            transition: width 0.3s ease;
-        }
-        @keyframes rainbow-flow {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-        .update-form { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 15px; 
-        }
-        .update-form input[type="number"] { 
-            width: 80px; 
-            padding: 8px; 
-            border: 1px solid #333;
-            border-radius: 4px; 
-            background: #0a0a0a; 
-            color: #ddd; 
-            text-align: center;
-        }
-        .update-form input[type="text"] { 
-            flex: 1; 
-            padding: 8px; 
-            border: 1px solid #333;
-            border-radius: 4px; 
-            background: #0a0a0a; 
-            color: #ddd; 
-        }
-        .update-form button { 
-            padding: 8px 16px; 
-            background: #222;
-            color: #aaa; 
-            border: 1px solid #333;
-            border-radius: 4px; 
-            font-weight: 600; 
-            cursor: pointer;
-        }
-        .update-form button:hover { 
-            background: #333;
-            color: #ddd;
-        }
-        .notes-section { 
-            margin-top: 15px; 
-            padding-top: 15px; 
-            border-top: 1px solid #222; 
-        }
-        .notes-title { 
-            font-size: 13px; 
-            color: #666; 
-            margin-bottom: 10px; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .note-item { 
-            background: #0a0a0a;
-            padding: 10px 12px; 
-            border-radius: 4px; 
-            margin-bottom: 6px; 
             font-size: 13px;
-            border-left: 2px solid #333;
+            color: #ccc;
         }
-        .note-progress { 
-            color: #888; 
-            font-weight: 600; 
-            margin-right: 8px; 
+
+        /* Dynamic Tasks list in Modal */
+        .modal-tasks-builder {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
         }
-        .no-notes { 
-            color: #444; 
-            font-style: italic; 
-            font-size: 13px; 
+        .modal-task-item {
+            display: flex;
+            gap: 8px;
         }
-        .export-btn {
-            background: #151515;
-            color: #888;
-            padding: 8px 16px;
+        .modal-task-item input {
+            flex: 1;
+            padding: 8px 12px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            color: #ddd;
+            font-size: 13px;
+        }
+        .modal-task-item button {
+            background: #222;
+            color: #777;
             border: 1px solid #333;
             border-radius: 4px;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+        .btn-add-task-row {
+            background: #141414;
+            color: #8888cc;
+            border: 1px dashed #2a2a4a;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-add-task-row:hover { background: #1a1a2e; color: #aaaaff; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #242424;
+        }
+        .modal-actions button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            margin-bottom: 20px;
         }
-        .export-btn:hover {
+        .btn-cancel {
             background: #222;
-            color: #aaa;
+            color: #888;
+            border: 1px solid #333;
         }
+        .btn-submit-event {
+            background: linear-gradient(135deg, #00f3ff, #0077ff);
+            color: #000;
+            border: none;
+        }
+
+        /* ───── Upcoming Events Layout ───── */
+        .upcoming-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 900px) { .upcoming-layout { grid-template-columns: 1fr; } }
+        .event-column {
+            background: #111;
+            border-radius: 8px;
+            border: 1px solid #222;
+            overflow: hidden;
+        }
+        .column-header {
+            padding: 16px 20px;
+            background: #151515;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .column-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ccc;
+        }
+        .page-nav { display: flex; align-items: center; gap: 8px; }
+        .page-nav a, .page-nav span {
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .page-nav a { background: #1a1a2e; color: #8888cc; border: 1px solid #2a2a4a; }
+        .page-nav .disabled { background: #111; color: #333; border: 1px solid #1a1a1a; pointer-events: none; }
+        .event-list { padding: 15px; }
+        .event-card {
+            background: #151515;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .event-card-header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+        .event-thumbnail { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; border: 1px solid #333; }
+        .event-info { flex: 1; min-width: 0; }
+        .event-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .event-title a { color: #ccc; text-decoration: none; }
+        .event-title a:hover { color: #00f3ff; }
+        .event-meta { font-size: 11px; color: #666; }
+        .event-details { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .event-tag { background: #1a1a2e; color: #8888cc; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+        .event-stat { background: #1a1a1a; color: #777; padding: 3px 8px; border-radius: 3px; font-size: 10px; }
+        .event-stat.prize { background: #1a2a1a; color: #7a7; }
+
+        /* ───── Participated Cards ───── */
+        .participated-card {
+            background: #141414;
+            padding: 20px 25px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        .participated-info { flex: 1; }
+        .participated-name { font-size: 18px; font-weight: 700; color: #eee; margin-bottom: 6px; }
+        .participated-result {
+            display: inline-block;
+            background: rgba(0, 230, 118, 0.12);
+            color: #00e676;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .participated-prize-won {
+            display: inline-block;
+            background: rgba(255, 190, 13, 0.12);
+            color: #ffbe0d;
+            border: 1px solid rgba(255, 190, 13, 0.3);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+            margin-left: 6px;
+        }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #444; }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Progress Tracker</h1>
-            <a href="/logout" class="logout">Logout</a>
+            <div class="header-actions">
+                {% if active_tab == 'tracker' %}
+                <button type="button" class="btn-add-event" onclick="openAddModal()">+ Add Event</button>
+                <a href="/export_csv" class="export-btn">Export CSV</a>
+                {% endif %}
+                <a href="/logout" class="logout">Logout</a>
+            </div>
         </header>
         
-        <a href="/export_csv" class="export-btn">Export CSV</a>
-        
-        <form class="add-form" method="POST" action="/add_hackathon">
-            <input type="text" name="name" placeholder="Hackathon name..." required autocomplete="off">
-            <input type="date" name="date">
-            <textarea name="description" placeholder="Description (optional)..." autocomplete="off"></textarea>
-            <button type="submit">Add</button>
-        </form>
-        
-        <div class="main-layout">
-            <div class="live-feed">
-                <h2>Live Hackathons</h2>
-                {% for live in live_hackathons %}
-                <div class="live-hackathon">
-                    {% if live.thumbnail_url %}
-                    <img class="live-thumbnail" src="{{ live.thumbnail_url }}" alt="thumb">
-                    {% endif %}
-                    <div class="live-title">
-                        <a href="{{ live.url }}" target="_blank">{{ live.title }}</a>
-                    </div>
-                    <div class="live-meta">
-                        {{ live.displayed_location.location }} • {{ live.open_state }} • {{ live.time_left_to_submission }}
-                    </div>
-                </div>
-                {% endfor %}
-                {% if not live_hackathons %}
-                <div class="live-meta">Unable to load live feed</div>
-                {% endif %}
-            </div>
-            
-            <div class="hackathons-container">
-                {% if hackathons %}
-                    {% for h in hackathons %}
-                    <div class="hackathon-wrapper">
-                        <div class="hackathon-card">
-                            <div class="hackathon-header">
-                                <div class="hackathon-header-left">
-                                    <span class="hackathon-percentage">{{ h.progress }}%</span>
-                                    <span class="hackathon-name">{{ h.name }}</span>
-                                </div>
-                                <form method="POST" action="/delete_hackathon/{{ h.id }}" style="display: inline;">
-                                    <button class="delete-btn" type="submit">Delete</button>
-                                </form>
-                            </div>
-                            {% if h.date %}
-                            <div class="hackathon-date">Date: {{ h.date }}</div>
-                            {% endif %}
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ h.progress }}%;"></div>
-                            </div>
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <a href="/?tab=tracker" class="tab-btn {{ 'active' if active_tab == 'tracker' }}">
+                <span class="tab-icon">📊</span>Progress Tracker
+            </a>
+            <a href="/?tab=upcoming" class="tab-btn {{ 'active' if active_tab == 'upcoming' }}">
+                <span class="tab-icon">🚀</span>Upcoming Events
+            </a>
+            <a href="/?tab=participated" class="tab-btn {{ 'active' if active_tab == 'participated' }}">
+                <span class="tab-icon">🏆</span>Participated Events
+            </a>
+        </nav>
+
+        <!-- ════════════════════════════════════════════ -->
+        <!-- TAB: Progress Tracker                        -->
+        <!-- ════════════════════════════════════════════ -->
+        {% if active_tab == 'tracker' %}
+        <div class="tab-content active">
+            {% if hackathons %}
+                {% for h in hackathons %}
+                <div class="event-accordion" id="accordion-{{ h.id }}">
+                    <!-- Collapsed Header -->
+                    <div class="event-accordion-header" onclick="toggleAccordion('{{ h.id }}')">
+                        <div class="header-left">
+                            <span class="arrow-toggle">▶</span>
+                            <span class="event-title-text">{{ h.name }}</span>
                             
-                            <form class="update-form" method="POST" action="/update_progress/{{ h.id }}">
-                                <input type="number" name="progress" value="{{ h.progress }}" required>
-                                <input type="text" name="note" placeholder="Add note (optional)..." autocomplete="off">
-                                <button type="submit">Update</button>
+                            <div class="header-badges">
+                                <!-- Mode Badge -->
+                                {% if h.event_type == 'offline' %}
+                                <span class="badge badge-mode-offline">📍 Offline</span>
+                                {% else %}
+                                <span class="badge badge-mode-online">🌐 Online</span>
+                                {% endif %}
+
+                                <!-- Status Badge -->
+                                <span class="badge status-badge-{{ h.id }} {% if h.progress == 100 %}badge-status-ready{% elif h.progress > 0 %}badge-status-in-progress{% else %}badge-status-not-started{% endif %}">
+                                    {% if h.progress == 100 %}🟢 Ready{% elif h.progress > 0 %}🟡 In Progress{% else %}⚪ Not Started{% endif %}
+                                </span>
+
+                                <!-- Countdown Badge -->
+                                {% if h.date %}
+                                <span class="badge badge-countdown" data-date="{{ h.date }}" data-id="{{ h.id }}" data-name="{{ h.name }}" data-prize="{{ h.prize_amount or '' }}">📅 {{ h.date }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar & Actions -->
+                        <div class="header-progress-wrap">
+                            <div class="mini-progress-bar">
+                                <div class="mini-progress-fill progress-fill-{{ h.id }}" style="width: {{ h.progress }}%;"></div>
+                            </div>
+                            <span class="progress-percent-text progress-percent-{{ h.id }}">{{ h.progress }}%</span>
+                        </div>
+
+                        <div class="header-actions-right" onclick="event.stopPropagation();">
+                            <button class="export-btn" style="padding: 5px 10px; font-size: 11px;" type="button" onclick="openMoveModal({{ h.id }}, '{{ h.name }}', '{{ h.prize_amount or '' }}')">✓ Participated</button>
+                            <form method="POST" action="/delete_hackathon/{{ h.id }}" style="display: inline;">
+                                <button class="export-btn" style="padding: 5px 10px; font-size: 11px; color: #ff5252;" type="submit">Delete</button>
                             </form>
                         </div>
-                        {% if h.description or h.file_attachments %}
-                        <div class="description-tile">
-                            {% if h.description %}
-                            <h3>Description</h3>
-                            <p>{{ h.description }}</p>
+                    </div>
+
+                    <!-- Expanded Body -->
+                    <div class="event-accordion-body">
+                        <!-- Metadata Strip -->
+                        <div class="metadata-strip">
+                            {% if h.url %}
+                            <div class="metadata-item">
+                                🔗 <a href="{{ h.url }}" target="_blank">Visit Event Page</a>
+                            </div>
                             {% endif %}
-                            <div class="file-section">
-                                <h4>Attachments</h4>
+                            {% if h.prize_amount %}
+                            <div class="metadata-item">💰 Prize Pool: <strong style="color:#ddd;">{{ h.prize_amount }}</strong></div>
+                            {% endif %}
+                            {% if h.location %}
+                            <div class="metadata-item">📍 Location: <strong style="color:#ddd;">{{ h.location }}</strong></div>
+                            {% endif %}
+                            {% if h.result_date %}
+                            <div class="metadata-item">🏆 Results Date: <strong style="color:#ddd;">{{ h.result_date }}</strong></div>
+                            {% endif %}
+                            <div class="metadata-item">
+                                Registration: 
+                                {% if h.registered %}
+                                <span style="color:#00e676; font-weight:700;">✅ Registered</span>
+                                {% else %}
+                                <span style="color:#ffbe0d; font-weight:600;">⏳ Pending</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Idea Box -->
+                        {% if h.idea %}
+                        <div class="idea-box">
+                            <h4>Project Idea / Concept</h4>
+                            <p>{{ h.idea }}</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Tasks Section (AJAX Enabled - Accordion stays open!) -->
+                        <div class="tasks-section">
+                            <div class="section-heading">
+                                Tasks & Checklist 
+                                (<span class="task-count-text-{{ h.id }}">{{ h.tasks | selectattr('completed') | list | length }} / {{ h.tasks | length }}</span>)
+                            </div>
+                            <div class="task-list task-list-{{ h.id }}">
+                                {% if h.tasks %}
+                                    {% for task in h.tasks %}
+                                    <div class="task-row {{ 'completed' if task.completed }}" id="task-row-{{ task.id }}">
+                                        <div class="task-checkbox-wrap" onclick="toggleTaskAjax('{{ task.id }}', '{{ h.id }}')">
+                                            <input type="checkbox" class="task-custom-checkbox" id="task-cb-{{ task.id }}" {{ 'checked' if task.completed }} onclick="event.stopPropagation(); toggleTaskAjax('{{ task.id }}', '{{ h.id }}')">
+                                            <span class="task-title-text">{{ task.title }}</span>
+                                        </div>
+                                        <button class="task-delete-btn" type="button" onclick="deleteTaskAjax('{{ task.id }}', '{{ h.id }}')">✕</button>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="no-tasks-msg-{{ h.id }}" style="font-size:12px; color:#555; font-style:italic;">No tasks added yet. Add one below.</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Inline Task Add (AJAX) -->
+                            <form class="add-task-inline" onsubmit="addTaskAjax(event, '{{ h.id }}')">
+                                <input type="text" id="new-task-input-{{ h.id }}" placeholder="Add a new task..." required autocomplete="off">
+                                <button type="submit">+ Add Task</button>
+                            </form>
+                        </div>
+
+                        <!-- Notes & Attachments -->
+                        <div class="notes-and-files">
+                            <!-- Notes -->
+                            <div>
+                                <div class="section-heading">Notes History</div>
+                                {% if h.notes %}
+                                    {% for note in h.notes %}
+                                    <div class="note-item">
+                                        <span class="note-progress">{{ note.progress }}%</span>
+                                        {{ note.note }}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div style="font-size:12px; color:#444; font-style:italic; margin-bottom:10px;">No notes logged.</div>
+                                {% endif %}
+                                <form method="POST" action="/add_note/{{ h.id }}" style="display:flex; gap:6px; margin-top:8px;">
+                                    <input type="text" name="note" placeholder="Add quick note..." style="flex:1; padding:6px 10px; background:#141414; border:1px solid #262626; border-radius:4px; color:#ddd; font-size:12px;" autocomplete="off">
+                                    <button type="submit" class="export-btn" style="padding:6px 12px; font-size:11px;">Save</button>
+                                </form>
+                            </div>
+
+                            <!-- Files -->
+                            <div>
+                                <div class="section-heading">Attachments</div>
                                 {% if h.file_attachments %}
                                     {% for file in h.file_attachments %}
                                     <div class="file-item">
                                         <a href="/view_file/{{ file.stored_filename }}" class="file-link" target="_blank">{{ file.original_filename }}</a>
                                         {% if file.file_type == 'md' %}
-                                        <a href="/modify_file/{{ h.id }}/{{ file.stored_filename }}" class="file-remove-btn" style="background: #222; color: #888;">Edit</a>
+                                        <a href="/modify_file/{{ h.id }}/{{ file.stored_filename }}" class="file-remove-btn" style="background:#1a1a2e; color:#8888cc;">Edit</a>
                                         {% endif %}
-                                        <form method="POST" action="/delete_file/{{ h.id }}/{{ file.stored_filename }}" style="display: inline;">
+                                        <form method="POST" action="/delete_file/{{ h.id }}/{{ file.stored_filename }}" style="display:inline;">
                                             <button class="file-remove-btn" type="submit">X</button>
                                         </form>
                                     </div>
                                     {% endfor %}
                                 {% else %}
-                                    <span style="color: #444; font-size: 11px;">No files</span>
+                                    <div style="font-size:12px; color:#444; font-style:italic; margin-bottom:10px;">No files attached.</div>
                                 {% endif %}
-                                <form class="file-upload-form" method="POST" action="/upload_file/{{ h.id }}" enctype="multipart/form-data">
-                                    <label class="file-upload-label" for="file-upload-{{ h.id }}">Upload .md/.pdf</label>
-                                    <input type="file" name="file" id="file-upload-{{ h.id }}" class="file-upload-input" accept=".md,.pdf" onchange="this.form.submit()">
+                                <form method="POST" action="/upload_file/{{ h.id }}" enctype="multipart/form-data" style="margin-top:8px;">
+                                    <label class="export-btn" style="font-size:11px; padding:6px 10px; cursor:pointer;" for="file-upload-{{ h.id }}">Upload .md/.pdf</label>
+                                    <input type="file" name="file" id="file-upload-{{ h.id }}" style="display:none;" accept=".md,.pdf" onchange="this.form.submit()">
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <p>No active events. Click <strong>+ Add Event</strong> above to create your first hackathon tracker.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ════ Add Event Modal ════ -->
+        <div class="modal-overlay" id="addModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>+ Add New Event</h3>
+                    <button class="modal-close-btn" onclick="closeAddModal()">✕</button>
+                </div>
+                <form method="POST" action="/add_hackathon">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Event Name *</label>
+                            <input type="text" name="name" placeholder="e.g. Gemini AI Hackathon 2026" required autocomplete="off">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Event Mode</label>
+                            <div class="mode-radio-group">
+                                <input type="radio" id="mode-online" name="event_type" value="online" checked>
+                                <label for="mode-online" class="mode-radio-label online">🌐 Online</label>
+
+                                <input type="radio" id="mode-offline" name="event_type" value="offline">
+                                <label for="mode-offline" class="mode-radio-label offline">📍 Offline</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Location / Venue</label>
+                            <input type="text" name="location" placeholder="e.g. Online or Bengaluru, KA" autocomplete="off">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Prize Pool / Amount</label>
+                            <input type="text" name="prize_amount" placeholder="e.g. $10,000 or ₹1,00,000" autocomplete="off">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Event Date</label>
+                            <input type="date" name="date">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Result Date</label>
+                            <input type="date" name="result_date">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Event Website URL</label>
+                            <input type="url" name="url" placeholder="https://devpost.com/..." autocomplete="off">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="checkbox-switch-label">
+                                <input type="checkbox" name="registered" value="true" style="width:16px; height:16px; accent-color:#00f3ff;">
+                                <span>Already Registered for this Event</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Idea / Project Concept</label>
+                            <textarea name="idea" placeholder="Describe your project concept, tech stack, or goal..." autocomplete="off"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Initial Tasks / Checklist</label>
+                            <div class="modal-tasks-builder" id="modalTasksContainer">
+                                <div class="modal-task-item">
+                                    <input type="text" name="tasks[]" placeholder="Task 1: Form Team & Finalize Idea" autocomplete="off">
+                                </div>
+                                <div class="modal-task-item">
+                                    <input type="text" name="tasks[]" placeholder="Task 2: Build MVP Prototype" autocomplete="off">
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-task-row" onclick="addModalTaskRow()">+ Add Task Field</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+                        <button type="submit" class="btn-submit-event">Create Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ════ Move to Participated Modal ════ -->
+        <div class="modal-overlay" id="moveModal">
+            <div class="modal-card" style="max-width:480px;">
+                <div class="modal-header">
+                    <h3>Mark as Participated</h3>
+                    <button class="modal-close-btn" onclick="closeMoveModal()">✕</button>
+                </div>
+                <form id="moveForm" method="POST" action="">
+                    <p style="color: #888; font-size: 13px; margin-bottom: 15px;">
+                        Moving <strong id="moveHackathonName" style="color: #00f3ff;"></strong> to Participated Events.
+                    </p>
+                    
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label>Outcome / Result *</label>
+                        <input type="text" name="result" placeholder="e.g. Won 1st Place, Top 10, Finalist, Completed..." required autocomplete="off">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label>Prize Won / Award (Optional)</label>
+                        <input type="text" id="movePrizeWonInput" name="prize_won" placeholder="e.g. $2,500 Cash Prize, Swag Kit, Trophy..." autocomplete="off">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeMoveModal()">Cancel</button>
+                        <button type="submit" class="btn-submit-event">Confirm Move</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Modal Toggles
+            function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+            function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+            function openMoveModal(id, name, defaultPrize) {
+                document.getElementById('moveForm').action = '/move_to_participated/' + id;
+                document.getElementById('moveHackathonName').textContent = name;
+                document.getElementById('movePrizeWonInput').value = defaultPrize || '';
+                document.getElementById('moveModal').classList.add('show');
+            }
+            function closeMoveModal() { document.getElementById('moveModal').classList.remove('show'); }
+
+            // Accordion Toggle
+            function toggleAccordion(id) {
+                const el = document.getElementById('accordion-' + id);
+                if (el) el.classList.toggle('expanded');
+            }
+
+            // Dynamic Modal Task Rows
+            function addModalTaskRow() {
+                const container = document.getElementById('modalTasksContainer');
+                const div = document.createElement('div');
+                div.className = 'modal-task-item';
+                div.innerHTML = `<input type="text" name="tasks[]" placeholder="New task item..." autocomplete="off"><button type="button" onclick="this.parentElement.remove()">✕</button>`;
+                container.appendChild(div);
+            }
+
+            // AJAX Task Toggling (Keeps Accordion Open & Updates Progress Instantly!)
+            async function toggleTaskAjax(taskId, hackathonId) {
+                const cb = document.getElementById('task-cb-' + taskId);
+                if (cb) cb.checked = !cb.checked; // Visual toggle sync
+
+                try {
+                    const res = await fetch('/toggle_task/' + taskId, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
+                        const row = document.getElementById('task-row-' + taskId);
+                        if (row) {
+                            if (data.completed) row.classList.add('completed');
+                            else row.classList.remove('completed');
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to toggle task via AJAX:', err);
+                }
+            }
+
+            // AJAX Inline Task Add
+            async function addTaskAjax(event, hackathonId) {
+                event.preventDefault();
+                const input = document.getElementById('new-task-input-' + hackathonId);
+                const title = input.value.trim();
+                if (!title) return;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('title', title);
+
+                    const res = await fetch('/add_task/' + hackathonId, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        input.value = '';
+                        // Append task row HTML
+                        const taskList = document.querySelector('.task-list-' + hackathonId);
+                        const noMsg = document.querySelector('.no-tasks-msg-' + hackathonId);
+                        if (noMsg) noMsg.remove();
+
+                        const div = document.createElement('div');
+                        div.className = 'task-row';
+                        div.id = 'task-row-' + data.task.id;
+                        div.innerHTML = `
+                            <div class="task-checkbox-wrap" onclick="toggleTaskAjax('${data.task.id}', '${hackathonId}')">
+                                <input type="checkbox" class="task-custom-checkbox" id="task-cb-${data.task.id}" onclick="event.stopPropagation(); toggleTaskAjax('${data.task.id}', '${hackathonId}')">
+                                <span class="task-title-text">${data.task.title}</span>
+                            </div>
+                            <button class="task-delete-btn" type="button" onclick="deleteTaskAjax('${data.task.id}', '${hackathonId}')">✕</button>
+                        `;
+                        taskList.appendChild(div);
+
+                        updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
+                    }
+                } catch (err) {
+                    console.error('Failed to add task via AJAX:', err);
+                }
+            }
+
+            // AJAX Task Delete
+            async function deleteTaskAjax(taskId, hackathonId) {
+                try {
+                    const res = await fetch('/delete_task/' + taskId, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const row = document.getElementById('task-row-' + taskId);
+                        if (row) row.remove();
+                        updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
+                    }
+                } catch (err) {
+                    console.error('Failed to delete task via AJAX:', err);
+                }
+            }
+
+            // Helper to update progress bar, %, counts & status badge in real time
+            function updateCardProgress(hackathonId, progress, completedCount, totalCount) {
+                // Update fill width
+                const fills = document.querySelectorAll('.progress-fill-' + hackathonId);
+                fills.forEach(f => f.style.width = progress + '%');
+
+                // Update % text
+                const percentTexts = document.querySelectorAll('.progress-percent-' + hackathonId);
+                percentTexts.forEach(t => t.textContent = progress + '%');
+
+                // Update count text
+                const countTexts = document.querySelectorAll('.task-count-text-' + hackathonId);
+                countTexts.forEach(c => c.textContent = `${completedCount} / ${totalCount}`);
+
+                // Update Status Badge
+                const badge = document.querySelector('.status-badge-' + hackathonId);
+                if (badge) {
+                    badge.className = `badge status-badge-${hackathonId} ` + 
+                        (progress === 100 ? 'badge-status-ready' : (progress > 0 ? 'badge-status-in-progress' : 'badge-status-not-started'));
+                    badge.innerHTML = progress === 100 ? '🟢 Ready' : (progress > 0 ? '🟡 In Progress' : '⚪ Not Started');
+                }
+            }
+
+            // Calculate Countdown Badges & Past Event Prompts
+            document.addEventListener('DOMContentLoaded', function() {
+                const today = new Date();
+                today.setHours(0,0,0,0);
+
+                document.querySelectorAll('.badge-countdown').forEach(badge => {
+                    const dateStr = badge.getAttribute('data-date');
+                    const hid = badge.getAttribute('data-id');
+                    const hname = badge.getAttribute('data-name');
+                    const hprize = badge.getAttribute('data-prize');
+                    if (!dateStr) return;
+
+                    const targetDate = new Date(dateStr);
+                    targetDate.setHours(0,0,0,0);
+                    
+                    const diffTime = targetDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (isNaN(diffDays)) return;
+
+                    if (diffDays < 0) {
+                        badge.innerHTML = `⚠️ Event Passed — Click to Mark as Participated`;
+                        badge.className = 'badge badge-past-prompt';
+                        badge.onclick = function(e) {
+                            e.stopPropagation();
+                            openMoveModal(hid, hname, hprize);
+                        };
+                    } else if (diffDays === 0) {
+                        badge.textContent = `🔥 Today!`;
+                        badge.classList.add('badge-countdown-urgent');
+                    } else if (diffDays < 3) {
+                        badge.textContent = `⏱ ${diffDays} day${diffDays > 1 ? 's' : ''} left`;
+                        badge.classList.add('badge-countdown-urgent');
+                    } else if (diffDays <= 7) {
+                        badge.textContent = `⏱ ${diffDays} days left`;
+                        badge.classList.add('badge-countdown-warning');
+                    } else {
+                        badge.textContent = `⏱ ${diffDays} days left`;
+                        badge.classList.add('badge-countdown-normal');
+                    }
+                });
+            });
+        </script>
+        {% endif %}
+
+        <!-- ════════════════════════════════════════════ -->
+        <!-- TAB: Upcoming Events                         -->
+        <!-- ════════════════════════════════════════════ -->
+        {% if active_tab == 'upcoming' %}
+        <div class="tab-content active">
+            <div class="upcoming-layout">
+                <!-- India Events Column -->
+                <div class="event-column">
+                    <div class="column-header">
+                        <span class="column-title">🇮🇳 India Events</span>
+                        <div class="page-nav">
+                            {% if india_page > 1 %}
+                            <a href="/?tab=upcoming&india_page={{ india_page - 1 }}&global_page={{ global_page }}">◀ Prev</a>
+                            {% else %}
+                            <span class="disabled">◀ Prev</span>
+                            {% endif %}
+                            <span style="color:#666; font-size:12px;">Page {{ india_page }}</span>
+                            <a href="/?tab=upcoming&india_page={{ india_page + 1 }}&global_page={{ global_page }}">Next ▶</a>
+                        </div>
+                    </div>
+                    <div class="event-list">
+                        {% if india_events %}
+                            {% for event in india_events %}
+                            <div class="event-card">
+                                <div class="event-card-header">
+                                    {% if event.thumbnail_url %}
+                                    <img class="event-thumbnail" src="{{ event.thumbnail_url }}" alt="thumbnail">
+                                    {% endif %}
+                                    <div class="event-info">
+                                        <div class="event-title">
+                                            <a href="{{ event.url }}" target="_blank">{{ event.title }}</a>
+                                        </div>
+                                        <div class="event-meta">
+                                            <span>📍 {{ event.displayed_location.location }}</span>
+                                            &nbsp;•&nbsp; {{ event.submission_period_dates }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="event-details">
+                                    {% if event.time_left_to_submission %}
+                                    <span class="event-stat" style="color:#a77;">⏱ {{ event.time_left_to_submission }}</span>
+                                    {% endif %}
+                                    {% if event.prize_amount %}
+                                    <span class="event-stat prize">💰 {{ event.prize_amount | replace('<span data-currency-value>', '') | replace('</span>', '') }}</span>
+                                    {% endif %}
+                                    {% for theme in event.themes %}
+                                    <span class="event-tag">{{ theme.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">No India events found on this page. Try next page →</div>
                         {% endif %}
                     </div>
-                    <div class="notes-section">
-                        <div class="notes-title">Notes:</div>
-                        {% if h.notes %}
-                            {% for note in h.notes %}
+                </div>
+
+                <!-- Global Events Column -->
+                <div class="event-column">
+                    <div class="column-header">
+                        <span class="column-title">🌍 Global Events</span>
+                        <div class="page-nav">
+                            {% if global_page > 1 %}
+                            <a href="/?tab=upcoming&india_page={{ india_page }}&global_page={{ global_page - 1 }}">◀ Prev</a>
+                            {% else %}
+                            <span class="disabled">◀ Prev</span>
+                            {% endif %}
+                            <span style="color:#666; font-size:12px;">Page {{ global_page }}</span>
+                            <a href="/?tab=upcoming&india_page={{ india_page }}&global_page={{ global_page + 1 }}">Next ▶</a>
+                        </div>
+                    </div>
+                    <div class="event-list">
+                        {% if global_events %}
+                            {% for event in global_events %}
+                            <div class="event-card">
+                                <div class="event-card-header">
+                                    {% if event.thumbnail_url %}
+                                    <img class="event-thumbnail" src="{{ event.thumbnail_url }}" alt="thumbnail">
+                                    {% endif %}
+                                    <div class="event-info">
+                                        <div class="event-title">
+                                            <a href="{{ event.url }}" target="_blank">{{ event.title }}</a>
+                                        </div>
+                                        <div class="event-meta">
+                                            <span>📍 {{ event.displayed_location.location }}</span>
+                                            &nbsp;•&nbsp; {{ event.submission_period_dates }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="event-details">
+                                    {% if event.time_left_to_submission %}
+                                    <span class="event-stat" style="color:#a77;">⏱ {{ event.time_left_to_submission }}</span>
+                                    {% endif %}
+                                    {% if event.prize_amount %}
+                                    <span class="event-stat prize">💰 {{ event.prize_amount | replace('<span data-currency-value>', '') | replace('</span>', '') }}</span>
+                                    {% endif %}
+                                    {% for theme in event.themes %}
+                                    <span class="event-tag">{{ theme.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">No global events found on this page.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ════════════════════════════════════════════ -->
+        <!-- TAB: Participated Events                     -->
+        <!-- ════════════════════════════════════════════ -->
+        {% if active_tab == 'participated' %}
+        <div class="tab-content active">
+            <div style="margin-bottom: 20px;">
+                <button type="button" class="btn-add-event" onclick="openAddParticipatedModal()">+ Add Participated Event</button>
+            </div>
+
+            {% if participated_events %}
+                {% for event in participated_events %}
+                <div class="participated-card">
+                    <div class="participated-info">
+                        <div class="participated-name">{{ event.name }}</div>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+                            {% if event.event_type == 'offline' %}
+                            <span class="badge badge-mode-offline">📍 Offline</span>
+                            {% else %}
+                            <span class="badge badge-mode-online">🌐 Online</span>
+                            {% endif %}
+
+                            {% if event.date %}
+                            <span style="font-size:12px; color:#666;">📅 {{ event.date }}</span>
+                            {% endif %}
+
+                            {% if event.location %}
+                            <span style="font-size:12px; color:#888;">📍 {{ event.location }}</span>
+                            {% endif %}
+
+                            {% if event.prize_amount %}
+                            <span style="font-size:12px; color:#7a7;">💰 Pool: {{ event.prize_amount }}</span>
+                            {% endif %}
+
+                            {% if event.url %}
+                            <a href="{{ event.url }}" target="_blank" style="font-size:12px; color:#00f3ff; text-decoration:none;">🔗 Visit Link</a>
+                            {% endif %}
+                        </div>
+
+                        {% if event.description or event.idea %}
+                        <div style="font-size:13px; color:#888; line-height:1.5; margin-bottom:8px; white-space:pre-wrap;">{{ event.idea or event.description }}</div>
+                        {% endif %}
+
+                        <div>
+                            {% if event.result %}
+                            <span class="participated-result">🏆 {{ event.result }}</span>
+                            {% endif %}
+
+                            {% if event.prize_won %}
+                            <span class="participated-prize-won">🎁 Award: {{ event.prize_won }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if event.file_attachments %}
+                        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #282828;">
+                            <div class="section-heading">Preserved Attachments</div>
+                            {% for file in event.file_attachments %}
+                            <div class="file-item">
+                                <a href="/view_file/{{ file.stored_filename }}?bucket=participated" class="file-link" target="_blank">{{ file.original_filename }}</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if event.notes %}
+                        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #282828;">
+                            <div class="section-heading">Preserved Notes</div>
+                            {% for note in event.notes %}
                             <div class="note-item">
                                 <span class="note-progress">{{ note.progress }}%</span>
                                 {{ note.note }}
                             </div>
                             {% endfor %}
-                        {% else %}
-                            <div class="no-notes">No notes</div>
+                        </div>
                         {% endif %}
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="hackathon-card" style="text-align: center; color: #555; flex: 1;">
-                        No hackathons. Add one above.
+
+                    <form method="POST" action="/delete_participated/{{ event.id }}">
+                        <button class="export-btn" style="color:#ff5252;" type="submit">Delete</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🏆</div>
+                    <p>No participated events yet.<br>Add one above or mark an active event as participated from the Progress Tracker tab.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Add Participated Modal -->
+        <div class="modal-overlay" id="addParticipatedModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>+ Add Participated Event</h3>
+                    <button class="modal-close-btn" onclick="closeAddParticipatedModal()">✕</button>
+                </div>
+                <form method="POST" action="/add_participated">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Event Name *</label>
+                            <input type="text" name="name" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Event Mode</label>
+                            <div class="mode-radio-group">
+                                <input type="radio" id="pmode-online" name="event_type" value="online" checked>
+                                <label for="pmode-online" class="mode-radio-label online">🌐 Online</label>
+
+                                <input type="radio" id="pmode-offline" name="event_type" value="offline">
+                                <label for="pmode-offline" class="mode-radio-label offline">📍 Offline</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Prize Pool</label>
+                            <input type="text" name="prize_amount" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Outcome / Result *</label>
+                            <input type="text" name="result" placeholder="e.g. Won 1st Place, Top 10, Finalist..." required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Prize Won / Award</label>
+                            <input type="text" name="prize_won" placeholder="e.g. $2,500 Cash, Swag Kit..." autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Event Date</label>
+                            <input type="date" name="date">
+                        </div>
+                        <div class="form-group">
+                            <label>Website URL</label>
+                            <input type="url" name="url" autocomplete="off">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Idea / Summary</label>
+                            <textarea name="idea" autocomplete="off"></textarea>
+                        </div>
                     </div>
-                {% endif %}
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeAddParticipatedModal()">Cancel</button>
+                        <button type="submit" class="btn-submit-event">Save Event</button>
+                    </div>
+                </form>
             </div>
         </div>
+
+        <script>
+            function openAddParticipatedModal() { document.getElementById('addParticipatedModal').classList.add('show'); }
+            function closeAddParticipatedModal() { document.getElementById('addParticipatedModal').classList.remove('show'); }
+        </script>
+        {% endif %}
     </div>
 </body>
 </html>
