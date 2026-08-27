@@ -1,6 +1,8 @@
 # Environment & Secret files
 .env
 supabase
+*.lock
+supaabse.lock
 
 # Python bytecode & cache
 __pycache__/

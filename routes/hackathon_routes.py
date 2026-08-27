@@ -116,6 +116,47 @@ def add_hackathon():
         
     return redirect(url_for('hackathon.index', tab='tracker'))
 
+@hackathon_bp.route('/edit_hackathon/<int:hackathon_id>', methods=['POST'])
+def edit_hackathon(hackathon_id):
+    if not session.get('authenticated'):
+        return redirect(url_for('hackathon.index'))
+    
+    try:
+        hackathon = Hackathon.query.get(hackathon_id)
+        if hackathon:
+            name = request.form.get('name', '').strip()
+            location = request.form.get('location', '').strip()
+            event_type = request.form.get('event_type', 'online').strip()
+            prize_amount = request.form.get('prize_amount', '').strip()
+            idea = request.form.get('idea', '').strip()
+            date = request.form.get('date', '').strip()
+            result_date = request.form.get('result_date', '').strip()
+            url = request.form.get('url', '').strip()
+            registered = request.form.get('registered') == 'true' or 'registered' in request.form
+            
+            if url and not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+                
+            if name:
+                hackathon.name = name
+                hackathon.location = location if location else None
+                hackathon.event_type = event_type if event_type in ['online', 'offline'] else 'online'
+                hackathon.prize_amount = prize_amount if prize_amount else None
+                hackathon.idea = idea if idea else None
+                hackathon.description = idea if idea else None
+                hackathon.date = date if date else None
+                hackathon.result_date = result_date if result_date else None
+                hackathon.url = url if url else None
+                hackathon.registered = registered
+                
+                db.session.commit()
+                logger.info(f"Updated hackathon ID {hackathon_id} successfully.")
+    except Exception as e:
+        logger.error(f"Failed to edit hackathon ID {hackathon_id}: {e}")
+        db.session.rollback()
+        
+    return redirect(url_for('hackathon.index', tab='tracker'))
+
 @hackathon_bp.route('/toggle_task/<int:task_id>', methods=['POST'])
 def toggle_task(task_id):
     if not session.get('authenticated'):
