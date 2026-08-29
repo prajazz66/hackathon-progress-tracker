@@ -243,6 +243,40 @@
             transform: scale(1.03);
         }
 
+        /* ───── Toast Error Notifications ───── */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast-message {
+            padding: 12px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 3.7s forwards;
+            pointer-events: auto;
+            max-width: 360px;
+        }
+        .toast-error {
+            background: rgba(255, 82, 82, 0.95);
+            border: 1px solid #ff5252;
+        }
+        .toast-success {
+            background: rgba(0, 230, 118, 0.95);
+            color: #000;
+            border: 1px solid #00e676;
+        }
+        @keyframes toastIn { from { opacity:0; transform:translateY(-15px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes toastOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-15px); } }
+
         /* ───── Accordion Compact Event Card ───── */
         .event-accordion {
             background: #141414;
@@ -1004,10 +1038,10 @@
                                 {% if h.tasks %}
                                     {% for task in h.tasks %}
                                     <div class="task-row {{ 'completed' if task.completed }}" id="task-row-{{ task.id }}">
-                                        <div class="task-checkbox-wrap" onclick="toggleTaskAjax('{{ task.id }}', '{{ h.id }}')">
-                                            <input type="checkbox" class="task-custom-checkbox" id="task-cb-{{ task.id }}" {{ 'checked' if task.completed }} onclick="event.stopPropagation(); toggleTaskAjax('{{ task.id }}', '{{ h.id }}')">
+                                        <label class="task-checkbox-wrap">
+                                            <input type="checkbox" class="task-custom-checkbox" id="task-cb-{{ task.id }}" {{ 'checked' if task.completed }} onchange="toggleTaskAjax('{{ task.id }}', '{{ h.id }}')">
                                             <span class="task-title-text">{{ task.title }}</span>
-                                        </div>
+                                        </label>
                                         <button class="task-delete-btn" type="button" onclick="deleteTaskAjax('{{ task.id }}', '{{ h.id }}')">✕</button>
                                     </div>
                                     {% endfor %}
@@ -1389,8 +1423,17 @@
                 container.appendChild(div);
             }
 
-            // AJAX Task Toggling (Keeps Accordion Open & Updates Progress Instantly!)
+            // AJAX Task Toggling (Instant Optimistic UI & Sync with Server)
             async function toggleTaskAjax(taskId, hackathonId) {
+                const cb = document.getElementById('task-cb-' + taskId);
+                const row = document.getElementById('task-row-' + taskId);
+
+                // Instant visual strike-through feedback (0ms delay)
+                if (row && cb) {
+                    if (cb.checked) row.classList.add('completed');
+                    else row.classList.remove('completed');
+                }
+
                 try {
                     const res = await fetch('/toggle_task/' + taskId, {
                         method: 'POST',
@@ -1398,28 +1441,83 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        const cb = document.getElementById('task-cb-' + taskId);
                         if (cb) cb.checked = data.completed;
-
-                        updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
-                        const row = document.getElementById('task-row-' + taskId);
                         if (row) {
                             if (data.completed) row.classList.add('completed');
                             else row.classList.remove('completed');
                         }
+                        updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
                     }
                 } catch (err) {
                     console.error('Failed to toggle task via AJAX:', err);
                 }
             }
 
-            // AJAX Inline Task Add
+            // Toast Notification Helper
+            function showToast(msg, type = 'error') {
+                let container = document.querySelector('.toast-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.className = 'toast-container';
+                    document.body.appendChild(container);
+                }
+                const toast = document.createElement('div');
+                toast.className = `toast-message toast-${type}`;
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.remove();
+                }, 4000);
+            }
+
+            // Optimistic UI Inline Task Add (0ms Instant Feedback + Fallback Rollback)
             async function addTaskAjax(event, hackathonId) {
                 event.preventDefault();
                 const input = document.getElementById('new-task-input-' + hackathonId);
                 const title = input.value.trim();
                 if (!title) return;
 
+                // 1. Generate unique temporary ID & clear input box immediately (0ms response)
+                const tempId = 'temp-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                input.value = '';
+
+                // 2. Read current DOM counts for rollback & optimistic calculation
+                const taskList = document.querySelector('.task-list-' + hackathonId);
+                const noMsg = document.querySelector('.no-tasks-msg-' + hackathonId);
+                const countTextEl = document.querySelector('.task-count-text-' + hackathonId);
+                
+                let completedCount = 0;
+                let totalCount = 0;
+                if (countTextEl) {
+                    const parts = countTextEl.textContent.split('/').map(s => parseInt(s.trim(), 10));
+                    completedCount = parts[0] || 0;
+                    totalCount = parts[1] || 0;
+                }
+
+                const prevTotal = totalCount;
+                const prevCompleted = completedCount;
+                const optTotal = totalCount + 1;
+                const optProgress = optTotal > 0 ? Math.round((completedCount / optTotal) * 100) : 0;
+
+                // 3. Optimistic DOM Insertion (0ms delay)
+                if (noMsg) noMsg.style.display = 'none';
+
+                const div = document.createElement('div');
+                div.className = 'task-row optimistic-saving';
+                div.id = 'task-row-' + tempId;
+                div.innerHTML = `
+                    <label class="task-checkbox-wrap">
+                        <input type="checkbox" class="task-custom-checkbox" id="task-cb-${tempId}" disabled>
+                        <span class="task-title-text">${title}</span>
+                    </label>
+                    <button class="task-delete-btn" type="button" disabled style="opacity:0.3; cursor:not-allowed;" title="Saving...">⏳</button>
+                `;
+                taskList.appendChild(div);
+
+                // Optimistically update progress bar & task counter
+                updateCardProgress(hackathonId, optProgress, completedCount, optTotal);
+
+                // 4. Asynchronous Background HTTP Save
                 try {
                     const formData = new FormData();
                     formData.append('title', title);
@@ -1429,30 +1527,52 @@
                         headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         body: formData
                     });
+
                     const data = await res.json();
-                    if (data.success) {
-                        input.value = '';
-                        // Append task row HTML
-                        const taskList = document.querySelector('.task-list-' + hackathonId);
-                        const noMsg = document.querySelector('.no-tasks-msg-' + hackathonId);
-                        if (noMsg) noMsg.remove();
+                    if (data.success && data.task) {
+                        // Confirm real DB ID & enable controls
+                        const realId = data.task.id;
+                        div.id = 'task-row-' + realId;
+                        div.classList.remove('optimistic-saving');
 
-                        const div = document.createElement('div');
-                        div.className = 'task-row';
-                        div.id = 'task-row-' + data.task.id;
-                        div.innerHTML = `
-                            <div class="task-checkbox-wrap" onclick="toggleTaskAjax('${data.task.id}', '${hackathonId}')">
-                                <input type="checkbox" class="task-custom-checkbox" id="task-cb-${data.task.id}" onclick="event.stopPropagation(); toggleTaskAjax('${data.task.id}', '${hackathonId}')">
-                                <span class="task-title-text">${data.task.title}</span>
-                            </div>
-                            <button class="task-delete-btn" type="button" onclick="deleteTaskAjax('${data.task.id}', '${hackathonId}')">✕</button>
-                        `;
-                        taskList.appendChild(div);
+                        const cb = div.querySelector('.task-custom-checkbox');
+                        if (cb) {
+                            cb.id = 'task-cb-' + realId;
+                            cb.disabled = false;
+                            cb.onchange = function() { toggleTaskAjax(realId, hackathonId); };
+                        }
 
+                        const delBtn = div.querySelector('.task-delete-btn');
+                        if (delBtn) {
+                            delBtn.textContent = '✕';
+                            delBtn.title = '';
+                            delBtn.style.opacity = '1';
+                            delBtn.style.cursor = 'pointer';
+                            delBtn.disabled = false;
+                            delBtn.onclick = function() { deleteTaskAjax(realId, hackathonId); };
+                        }
+
+                        // Sync with authoritative server counts
                         updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
+                    } else {
+                        throw new Error(data.error || 'Server error saving task');
                     }
                 } catch (err) {
-                    console.error('Failed to add task via AJAX:', err);
+                    console.error('Optimistic Task Add Failed:', err);
+
+                    // 5. ROLLBACK on failure
+                    div.remove();
+                    if (noMsg && taskList.children.length === 0) noMsg.style.display = 'block';
+
+                    // Revert progress bar & counts
+                    const rollbackProgress = prevTotal > 0 ? Math.round((prevCompleted / prevTotal) * 100) : 0;
+                    updateCardProgress(hackathonId, rollbackProgress, prevCompleted, prevTotal);
+
+                    // Re-populate input text so user doesn't lose what they typed
+                    input.value = title;
+
+                    // Show Toast Error Notification
+                    showToast('Failed to save task. Please check your connection.', 'error');
                 }
             }
 
