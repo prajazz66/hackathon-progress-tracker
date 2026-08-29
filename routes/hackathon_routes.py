@@ -74,7 +74,9 @@ def add_hackathon():
         date = request.form.get('date', '').strip()
         result_date = request.form.get('result_date', '').strip()
         url = request.form.get('url', '').strip()
-        registered = request.form.get('registered') == 'true' or 'registered' in request.form
+        registered = request.form.get('registered') in ['true', 'True', '1', 'on']
+        is_idea_submission = request.form.get('is_idea_submission') in ['true', 'True', '1', 'on']
+        header_note = request.form.get('header_note', '').strip()
         
         # Ensure URL has protocol if provided
         if url and not url.startswith(('http://', 'https://')):
@@ -96,6 +98,8 @@ def add_hackathon():
                 result_date=result_date if result_date else None,
                 url=url if url else None,
                 registered=registered,
+                is_idea_submission=is_idea_submission,
+                header_note=header_note if header_note else None,
                 progress=0
             )
             db.session.add(hackathon)
@@ -132,7 +136,9 @@ def edit_hackathon(hackathon_id):
             date = request.form.get('date', '').strip()
             result_date = request.form.get('result_date', '').strip()
             url = request.form.get('url', '').strip()
-            registered = request.form.get('registered') == 'true' or 'registered' in request.form
+            registered = request.form.get('registered') in ['true', 'True', '1', 'on']
+            is_idea_submission = request.form.get('is_idea_submission') in ['true', 'True', '1', 'on']
+            header_note = request.form.get('header_note', '').strip()
             
             if url and not url.startswith(('http://', 'https://')):
                 url = 'https://' + url
@@ -148,6 +154,8 @@ def edit_hackathon(hackathon_id):
                 hackathon.result_date = result_date if result_date else None
                 hackathon.url = url if url else None
                 hackathon.registered = registered
+                hackathon.is_idea_submission = is_idea_submission
+                hackathon.header_note = header_note if header_note else None
                 
                 db.session.commit()
                 logger.info(f"Updated hackathon ID {hackathon_id} successfully.")
@@ -166,24 +174,28 @@ def toggle_task(task_id):
     
     try:
         task = Task.query.get(task_id)
-        if task:
-            task.completed = not task.completed
-            hackathon = task.hackathon
-            progress = hackathon.update_progress()
-            db.session.commit()
-            
+        if not task:
             if _is_ajax():
-                completed_count = sum(1 for t in hackathon.tasks if t.completed)
-                total_count = len(hackathon.tasks)
-                return jsonify({
-                    'success': True,
-                    'task_id': task.id,
-                    'completed': task.completed,
-                    'hackathon_id': hackathon.id,
-                    'progress': progress,
-                    'completed_count': completed_count,
-                    'total_count': total_count
-                })
+                return jsonify({'error': 'Task not found'}), 404
+            return redirect(url_for('hackathon.index', tab='tracker'))
+            
+        task.completed = not task.completed
+        hackathon = task.hackathon
+        progress = hackathon.update_progress()
+        db.session.commit()
+        
+        if _is_ajax():
+            completed_count = sum(1 for t in hackathon.tasks if t.completed)
+            total_count = len(hackathon.tasks)
+            return jsonify({
+                'success': True,
+                'task_id': task.id,
+                'completed': task.completed,
+                'hackathon_id': hackathon.id,
+                'progress': progress,
+                'completed_count': completed_count,
+                'total_count': total_count
+            })
     except Exception as e:
         logger.error(f"Failed to toggle task ID {task_id}: {e}")
         db.session.rollback()
@@ -244,24 +256,28 @@ def delete_task(task_id):
     
     try:
         task = Task.query.get(task_id)
-        if task:
-            hackathon = task.hackathon
-            db.session.delete(task)
-            db.session.flush()
-            progress = hackathon.update_progress()
-            db.session.commit()
-            
+        if not task:
             if _is_ajax():
-                completed_count = sum(1 for t in hackathon.tasks if t.completed)
-                total_count = len(hackathon.tasks)
-                return jsonify({
-                    'success': True,
-                    'task_id': task_id,
-                    'hackathon_id': hackathon.id,
-                    'progress': progress,
-                    'completed_count': completed_count,
-                    'total_count': total_count
-                })
+                return jsonify({'error': 'Task not found'}), 404
+            return redirect(url_for('hackathon.index', tab='tracker'))
+
+        hackathon = task.hackathon
+        db.session.delete(task)
+        db.session.flush()
+        progress = hackathon.update_progress()
+        db.session.commit()
+        
+        if _is_ajax():
+            completed_count = sum(1 for t in hackathon.tasks if t.completed)
+            total_count = len(hackathon.tasks)
+            return jsonify({
+                'success': True,
+                'task_id': task_id,
+                'hackathon_id': hackathon.id,
+                'progress': progress,
+                'completed_count': completed_count,
+                'total_count': total_count
+            })
     except Exception as e:
         logger.error(f"Failed to delete task ID {task_id}: {e}")
         db.session.rollback()
@@ -338,6 +354,7 @@ def move_to_participated(hackathon_id):
             description=hackathon.idea or hackathon.description,
             result=result,
             prize_won=prize_won,
+            is_idea_submission=hackathon.is_idea_submission,
             source_hackathon_id=hackathon.id
         )
         db.session.add(participated)

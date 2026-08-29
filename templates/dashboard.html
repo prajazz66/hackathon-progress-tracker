@@ -175,6 +175,27 @@
             border: 1px solid rgba(224, 86, 253, 0.35);
             box-shadow: 0 0 10px rgba(224, 86, 253, 0.15);
         }
+        .badge-phase-idea {
+            background: rgba(255, 235, 59, 0.15);
+            color: #ffeb3b;
+            border: 1px solid rgba(255, 235, 59, 0.4);
+            box-shadow: 0 0 10px rgba(255, 235, 59, 0.15);
+        }
+        .header-quick-note {
+            background: rgba(0, 243, 255, 0.12);
+            color: #00f3ff;
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.25);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
 
         /* Color-Coded Status Badges */
         .badge-status-not-started {
@@ -643,6 +664,15 @@
             border-color: #e056fd;
         }
 
+        /* Phase Switch Toggle */
+        .phase-toggle-box {
+            background: rgba(255, 235, 59, 0.06);
+            border: 1px solid rgba(255, 235, 59, 0.25);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
+
         /* Registration Switch */
         .checkbox-switch-label {
             display: flex;
@@ -857,6 +887,9 @@
                         <div class="header-left">
                             <span class="arrow-toggle">▶</span>
                             <span class="event-title-text">{{ h.name }}</span>
+                            {% if h.header_note %}
+                            <span class="header-quick-note" title="{{ h.header_note }}">📌 {{ h.header_note }}</span>
+                            {% endif %}
                             
                             <div class="header-badges">
                                 <!-- Mode Badge -->
@@ -866,6 +899,11 @@
                                 <span class="badge badge-mode-online">🌐 Online</span>
                                 {% endif %}
 
+                                <!-- Idea Phase Badge -->
+                                {% if h.is_idea_submission %}
+                                <span class="badge badge-phase-idea">💡 Idea Phase</span>
+                                {% endif %}
+
                                 <!-- Status Badge -->
                                 <span class="badge status-badge-{{ h.id }} {% if h.progress == 100 %}badge-status-ready{% elif h.progress > 0 %}badge-status-in-progress{% else %}badge-status-not-started{% endif %}">
                                     {% if h.progress == 100 %}🟢 Ready{% elif h.progress > 0 %}🟡 In Progress{% else %}⚪ Not Started{% endif %}
@@ -873,7 +911,7 @@
 
                                 <!-- Countdown Badge -->
                                 {% if h.date %}
-                                <span class="badge badge-countdown" data-date="{{ h.date }}" data-id="{{ h.id }}" data-name="{{ h.name }}" data-prize="{{ h.prize_amount or '' }}">📅 {{ h.date }}</span>
+                                <span class="badge badge-countdown" data-date="{{ h.date }}" data-id="{{ h.id }}" data-name="{{ h.name }}" data-prize="{{ h.prize_amount or '' }}" data-idea-phase="{{ 'true' if h.is_idea_submission else 'false' }}">📅 {{ h.date }}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -888,19 +926,24 @@
 
                         <div class="header-actions-right" onclick="event.stopPropagation();">
                             <button class="export-btn" style="padding: 5px 10px; font-size: 11px; color: #00f3ff;" type="button" 
-                                onclick='openEditModal({
-                                    id: "{{ h.id }}",
-                                    name: "{{ h.name | escape }}",
-                                    event_type: "{{ h.event_type or 'online' }}",
-                                    location: "{{ (h.location or '') | escape }}",
-                                    prize_amount: "{{ (h.prize_amount or '') | escape }}",
-                                    date: "{{ h.date or '' }}",
-                                    result_date: "{{ h.result_date or '' }}",
-                                    url: "{{ (h.url or '') | escape }}",
-                                    registered: {{ 'true' if h.registered else 'false' }},
-                                    idea: "{{ (h.idea or h.description or '') | replace('\n', '\\n') | replace('\r', '') | escape }}"
-                                })'>Edit</button>
-                            <button class="export-btn" style="padding: 5px 10px; font-size: 11px;" type="button" onclick="openMoveModal({{ h.id }}, '{{ h.name }}', '{{ h.prize_amount or '' }}')">✓ Participated</button>
+                                data-id="{{ h.id }}"
+                                data-name="{{ h.name }}"
+                                data-event-type="{{ h.event_type or 'online' }}"
+                                data-location="{{ h.location or '' }}"
+                                data-prize-amount="{{ h.prize_amount or '' }}"
+                                data-date="{{ h.date or '' }}"
+                                data-result-date="{{ h.result_date or '' }}"
+                                data-url="{{ h.url or '' }}"
+                                data-registered="{{ 'true' if h.registered else 'false' }}"
+                                data-is-idea-submission="{{ 'true' if h.is_idea_submission else 'false' }}"
+                                data-header-note="{{ h.header_note or '' }}"
+                                data-idea="{{ h.idea or h.description or '' }}"
+                                onclick="openEditModalFromBtn(this)">Edit</button>
+                            <button class="export-btn" style="padding: 5px 10px; font-size: 11px;" type="button" 
+                                data-id="{{ h.id }}"
+                                data-name="{{ h.name }}"
+                                data-prize="{{ h.prize_amount or '' }}"
+                                onclick="openMoveModalFromBtn(this)">✓ Participated</button>
                             <form method="POST" action="/delete_hackathon/{{ h.id }}" style="display: inline;">
                                 <button class="export-btn" style="padding: 5px 10px; font-size: 11px; color: #ff5252;" type="submit">Delete</button>
                             </form>
@@ -926,11 +969,19 @@
                             <div class="metadata-item">🏆 Results Date: <strong style="color:#ddd;">{{ h.result_date }}</strong></div>
                             {% endif %}
                             <div class="metadata-item">
-                                Registration: 
-                                {% if h.registered %}
-                                <span style="color:#00e676; font-weight:700;">✅ Registered</span>
+                                Status: 
+                                {% if h.is_idea_submission %}
+                                    {% if h.registered %}
+                                    <span style="color:#00e676; font-weight:700;">💡 Idea Submitted</span>
+                                    {% else %}
+                                    <span style="color:#ffbe0d; font-weight:600;">⏳ Proposal Pending</span>
+                                    {% endif %}
                                 {% else %}
-                                <span style="color:#ffbe0d; font-weight:600;">⏳ Pending</span>
+                                    {% if h.registered %}
+                                    <span style="color:#00e676; font-weight:700;">✅ Registered</span>
+                                    {% else %}
+                                    <span style="color:#ffbe0d; font-weight:600;">⏳ Pending</span>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </div>
@@ -1043,6 +1094,19 @@
                         </div>
 
                         <div class="form-group full-width">
+                            <label>Quick Note / Highlight Tag (Always Visible on Header)</label>
+                            <input type="text" name="header_note" placeholder="e.g. Team of 3 • Focus on UI Prototype • Pitch Ready" autocomplete="off">
+                        </div>
+
+                        <!-- Phase Toggle Box -->
+                        <div class="form-group full-width phase-toggle-box">
+                            <label class="checkbox-switch-label" style="font-weight:700; color:#ffeb3b;">
+                                <input type="checkbox" id="add-is_idea_submission" name="is_idea_submission" value="true" style="width:16px; height:16px; accent-color:#ffeb3b;" onchange="toggleIdeaSubmissionLabels('add')">
+                                <span>💡 Online Idea Submission Phase (Switch ON for Idea Phase)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width">
                             <label>Event Mode</label>
                             <div class="mode-radio-group">
                                 <input type="radio" id="mode-online" name="event_type" value="online" checked>
@@ -1064,12 +1128,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Event Date</label>
+                            <label id="add-date-label">Event Date</label>
                             <input type="date" name="date">
                         </div>
 
                         <div class="form-group">
-                            <label>Result Date</label>
+                            <label id="add-result_date-label">Result Date</label>
                             <input type="date" name="result_date">
                         </div>
 
@@ -1081,7 +1145,7 @@
                         <div class="form-group full-width">
                             <label class="checkbox-switch-label">
                                 <input type="checkbox" name="registered" value="true" style="width:16px; height:16px; accent-color:#00f3ff;">
-                                <span>Already Registered for this Event</span>
+                                <span id="add-registered-label">Already Registered for this Event</span>
                             </label>
                         </div>
 
@@ -1127,6 +1191,19 @@
                         </div>
 
                         <div class="form-group full-width">
+                            <label>Quick Note / Highlight Tag (Always Visible on Header)</label>
+                            <input type="text" id="edit-header_note" name="header_note" placeholder="e.g. Team of 3 • Focus on UI Prototype • Pitch Ready" autocomplete="off">
+                        </div>
+
+                        <!-- Phase Toggle Box -->
+                        <div class="form-group full-width phase-toggle-box">
+                            <label class="checkbox-switch-label" style="font-weight:700; color:#ffeb3b;">
+                                <input type="checkbox" id="edit-is_idea_submission" name="is_idea_submission" value="true" style="width:16px; height:16px; accent-color:#ffeb3b;" onchange="toggleIdeaSubmissionLabels('edit')">
+                                <span>💡 Online Idea Submission Phase (Switch ON for Idea Phase)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width">
                             <label>Event Mode</label>
                             <div class="mode-radio-group">
                                 <input type="radio" id="emode-online" name="event_type" value="online">
@@ -1148,12 +1225,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Event Date</label>
+                            <label id="edit-date-label">Event Date</label>
                             <input type="date" id="edit-date" name="date">
                         </div>
 
                         <div class="form-group">
-                            <label>Result Date</label>
+                            <label id="edit-result_date-label">Result Date</label>
                             <input type="date" id="edit-result_date" name="result_date">
                         </div>
 
@@ -1165,7 +1242,7 @@
                         <div class="form-group full-width">
                             <label class="checkbox-switch-label">
                                 <input type="checkbox" id="edit-registered" name="registered" value="true" style="width:16px; height:16px; accent-color:#00f3ff;">
-                                <span>Already Registered for this Event</span>
+                                <span id="edit-registered-label">Already Registered for this Event</span>
                             </label>
                         </div>
 
@@ -1214,13 +1291,60 @@
         </div>
 
         <script>
-            // Modal Toggles
-            function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+            // Modal Toggles & Dynamic Idea Mode Labels
+            function openAddModal() { 
+                document.getElementById('add-is_idea_submission').checked = false;
+                toggleIdeaSubmissionLabels('add');
+                document.getElementById('addModal').classList.add('show'); 
+            }
             function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
             
+            function toggleIdeaSubmissionLabels(prefix) {
+                const isIdea = document.getElementById(prefix + '-is_idea_submission').checked;
+                const dateLabel = document.getElementById(prefix + '-date-label');
+                const resultDateLabel = document.getElementById(prefix + '-result_date-label');
+                const regLabel = document.getElementById(prefix + '-registered-label');
+
+                if (isIdea) {
+                    if (dateLabel) dateLabel.textContent = "Last Date for Idea Submission";
+                    if (resultDateLabel) resultDateLabel.textContent = "Result Announcement Date";
+                    if (regLabel) regLabel.textContent = "Idea / Proposal Submitted";
+                } else {
+                    if (dateLabel) dateLabel.textContent = "Event Date";
+                    if (resultDateLabel) resultDateLabel.textContent = "Result Date";
+                    if (regLabel) regLabel.textContent = "Already Registered for this Event";
+                }
+            }
+
+            function openEditModalFromBtn(btn) {
+                openEditModal({
+                    id: btn.getAttribute('data-id'),
+                    name: btn.getAttribute('data-name'),
+                    event_type: btn.getAttribute('data-event-type'),
+                    location: btn.getAttribute('data-location'),
+                    prize_amount: btn.getAttribute('data-prize-amount'),
+                    date: btn.getAttribute('data-date'),
+                    result_date: btn.getAttribute('data-result-date'),
+                    url: btn.getAttribute('data-url'),
+                    registered: btn.getAttribute('data-registered') === 'true',
+                    is_idea_submission: btn.getAttribute('data-is-idea-submission') === 'true',
+                    header_note: btn.getAttribute('data-header-note'),
+                    idea: btn.getAttribute('data-idea')
+                });
+            }
+
+            function openMoveModalFromBtn(btn) {
+                openMoveModal(
+                    btn.getAttribute('data-id'),
+                    btn.getAttribute('data-name'),
+                    btn.getAttribute('data-prize')
+                );
+            }
+
             function openEditModal(data) {
                 document.getElementById('editForm').action = '/edit_hackathon/' + data.id;
                 document.getElementById('edit-name').value = data.name || '';
+                document.getElementById('edit-header_note').value = data.header_note || '';
                 document.getElementById('edit-location').value = data.location || '';
                 document.getElementById('edit-prize_amount').value = data.prize_amount || '';
                 document.getElementById('edit-date').value = data.date || '';
@@ -1228,7 +1352,10 @@
                 document.getElementById('edit-url').value = data.url || '';
                 document.getElementById('edit-idea').value = data.idea || '';
                 document.getElementById('edit-registered').checked = !!data.registered;
+                document.getElementById('edit-is_idea_submission').checked = !!data.is_idea_submission;
                 
+                toggleIdeaSubmissionLabels('edit');
+
                 if (data.event_type === 'offline') {
                     document.getElementById('emode-offline').checked = true;
                 } else {
@@ -1264,9 +1391,6 @@
 
             // AJAX Task Toggling (Keeps Accordion Open & Updates Progress Instantly!)
             async function toggleTaskAjax(taskId, hackathonId) {
-                const cb = document.getElementById('task-cb-' + taskId);
-                if (cb) cb.checked = !cb.checked; // Visual toggle sync
-
                 try {
                     const res = await fetch('/toggle_task/' + taskId, {
                         method: 'POST',
@@ -1274,6 +1398,9 @@
                     });
                     const data = await res.json();
                     if (data.success) {
+                        const cb = document.getElementById('task-cb-' + taskId);
+                        if (cb) cb.checked = data.completed;
+
                         updateCardProgress(hackathonId, data.progress, data.completed_count, data.total_count);
                         const row = document.getElementById('task-row-' + taskId);
                         if (row) {
@@ -1380,9 +1507,11 @@
                     const hid = badge.getAttribute('data-id');
                     const hname = badge.getAttribute('data-name');
                     const hprize = badge.getAttribute('data-prize');
+                    const isIdeaPhase = badge.getAttribute('data-idea-phase') === 'true';
+
                     if (!dateStr) return;
 
-                    const targetDate = new Date(dateStr);
+                    const targetDate = new Date(dateStr.replace(/-/g, '/'));
                     targetDate.setHours(0,0,0,0);
                     
                     const diffTime = targetDate - today;
@@ -1390,24 +1519,26 @@
 
                     if (isNaN(diffDays)) return;
 
+                    const prefixLabel = isIdeaPhase ? 'submit idea' : 'event';
+
                     if (diffDays < 0) {
-                        badge.innerHTML = `⚠️ Event Passed — Click to Mark as Participated`;
+                        badge.innerHTML = `⚠️ Date Passed — Click to Mark as Participated`;
                         badge.className = 'badge badge-past-prompt';
                         badge.onclick = function(e) {
                             e.stopPropagation();
                             openMoveModal(hid, hname, hprize);
                         };
                     } else if (diffDays === 0) {
-                        badge.textContent = `🔥 Today!`;
+                        badge.textContent = isIdeaPhase ? `🔥 Idea Deadline Today!` : `🔥 Today!`;
                         badge.classList.add('badge-countdown-urgent');
                     } else if (diffDays < 3) {
-                        badge.textContent = `⏱ ${diffDays} day${diffDays > 1 ? 's' : ''} left`;
+                        badge.textContent = `⏱ ${diffDays} day${diffDays > 1 ? 's' : ''} to ${prefixLabel}`;
                         badge.classList.add('badge-countdown-urgent');
                     } else if (diffDays <= 7) {
-                        badge.textContent = `⏱ ${diffDays} days left`;
+                        badge.textContent = `⏱ ${diffDays} days to ${prefixLabel}`;
                         badge.classList.add('badge-countdown-warning');
                     } else {
-                        badge.textContent = `⏱ ${diffDays} days left`;
+                        badge.textContent = `⏱ ${diffDays} days to ${prefixLabel}`;
                         badge.classList.add('badge-countdown-normal');
                     }
                 });
@@ -1545,6 +1676,10 @@
                             <span class="badge badge-mode-offline">📍 Offline</span>
                             {% else %}
                             <span class="badge badge-mode-online">🌐 Online</span>
+                            {% endif %}
+
+                            {% if event.is_idea_submission %}
+                            <span class="badge badge-phase-idea">💡 Idea Phase</span>
                             {% endif %}
 
                             {% if event.date %}

@@ -12,6 +12,8 @@ class Hackathon(db.Model):
     result_date = db.Column(db.String(100))             # Result announcement date
     url = db.Column(db.String(500))                     # Clickable event URL
     registered = db.Column(db.Boolean, default=False)   # Registration status checkbox
+    is_idea_submission = db.Column(db.Boolean, default=False) # Online idea submission phase toggle
+    header_note = db.Column(db.String(255))             # Mild neon quick note / highlight
     description = db.Column(db.Text)                    # Legacy field support
     progress = db.Column(db.Integer, default=0)         # Auto-calculated percentage
 
@@ -53,6 +55,7 @@ class ParticipatedEvent(db.Model):
     description = db.Column(db.Text)
     result = db.Column(db.String(255))  # e.g., "Won 1st place", "Completed"
     prize_won = db.Column(db.String(255))  # e.g., "$2,500 Cash Prize", "Swag Kit"
+    is_idea_submission = db.Column(db.Boolean, default=False)
     source_hackathon_id = db.Column(db.Integer, nullable=True)  # Reference only, not a FK
 
     # Relationships for preserved notes & attachments
