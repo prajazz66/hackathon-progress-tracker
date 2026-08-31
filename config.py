@@ -1,11 +1,23 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
-
-# Load environment variables from .env
-load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'hackathon-tracker-secret-key')
+    
+    # Session Expiration & Management (Strict 2-hour lifetime)
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
+    SESSION_REFRESH_EACH_REQUEST = True
+    
+    # Strict Multi-User Authentication Credentials from AUTH_USERS
+    raw_auth = os.environ.get('AUTH_USERS', '')
+    ALLOWED_USERS = {}
+    if raw_auth:
+        for item in raw_auth.split(','):
+            if ':' in item:
+                user, pwd = item.split(':', 1)
+                if user.strip() and pwd.strip():
+                    ALLOWED_USERS[user.strip().lower()] = pwd.strip()
     
     # Database configuration with postgres:// -> postgresql:// conversion
     raw_db_url = os.environ.get('DATABASE_URL')
