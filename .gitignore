@@ -1,0 +1,33 @@
+# Environment & Secret files
+.env
+supabase
+*.lock
+supaabse.lock
+
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Local Database & Instance files
+instance/
+*.db
+*.sqlite3
+
+# Uploaded media & temp files
+static/uploads/*
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+.agents/
+
+# Exclude all markdown files and env example
+*.md
+.env.example

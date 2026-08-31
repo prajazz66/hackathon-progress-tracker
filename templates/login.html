@@ -41,6 +41,7 @@
             content: "// ";
             color: #555;
         }
+        input[type="text"],
         input[type="password"] {
             width: 100%;
             padding: 14px;
@@ -49,35 +50,42 @@
             background: #0a0a0a;
             color: #ddd;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             font-family: inherit;
         }
-        input[type="password"]::placeholder { color: #555; }
+        input::placeholder { color: #555; }
+        input:focus {
+            outline: none;
+            border-color: #00f3ff;
+        }
         button {
             width: 100%;
             padding: 14px;
-            background: #222;
-            color: #888;
-            border: 1px solid #333;
+            background: linear-gradient(135deg, #00f3ff, #0077ff);
+            color: #000;
+            border: none;
             border-radius: 4px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-top: 6px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.25);
+            transition: all 0.2s ease;
         }
         button:hover {
-            background: #333;
-            color: #ddd;
+            box-shadow: 0 0 22px rgba(0, 243, 255, 0.45);
         }
         .error {
-            background: #222;
-            color: #777;
+            background: rgba(255, 82, 82, 0.12);
+            color: #ff5252;
             padding: 10px;
             border-radius: 4px;
             margin-bottom: 20px;
             text-align: center;
-            border: 1px solid #333;
+            border: 1px solid rgba(255, 82, 82, 0.35);
+            font-size: 13px;
         }
     </style>
 </head>
@@ -88,8 +96,9 @@
         <div class="error">{{ error }}</div>
         {% endif %}
         <form method="POST" action="/login">
-            <input type="password" name="passcode" placeholder="Enter passcode..." required autocomplete="off">
-            <button type="submit">Initialize</button>
+            <input type="text" name="username" placeholder="Username" required autocomplete="username">
+            <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+            <button type="submit">Authenticate</button>
         </form>
     </div>
 </body>
